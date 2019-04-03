@@ -3,7 +3,7 @@ package errors
 import (
 	"encoding/json"
 	"fmt"
-	"gopintar-utils/response"
+	"github.com/sillyhatxu/go-utils/response"
 )
 
 type ShopintarError struct {

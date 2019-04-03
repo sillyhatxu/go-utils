@@ -2,8 +2,8 @@ package rabbitmq
 
 import (
 	"encoding/json"
+	"github.com/sillyhatxu/go-utils/uuid"
 	"github.com/stretchr/testify/assert"
-	"gopintar-utils/uuid"
 	"strconv"
 	"testing"
 	"time"

@@ -1,8 +1,8 @@
 package redislock
 
 import (
+	redis "github.com/sillyhatxu/go-utils/redis/goredis"
 	log "github.com/sirupsen/logrus"
-	redis "gopintar-utils/redis/goredis"
 	"strconv"
 	"testing"
 	"time"
