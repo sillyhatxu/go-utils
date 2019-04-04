@@ -33,14 +33,13 @@ func (rc RedisConfig) GetClient() (*redis.Client, error) {
 	return client, nil
 }
 
-func (rc RedisConfig) Ping() error {
+func (rc RedisConfig) Ping() (string, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr:     rc.address,
 		Password: rc.password,
 		DB:       rc.db,
 	})
-	_, err := client.Ping().Result()
-	return err
+	return client.Ping().Result()
 }
 
 func (rc RedisConfig) Get(key string) (string, error) {

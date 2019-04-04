@@ -1,6 +1,7 @@
 package goredis
 
 import (
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -17,9 +18,28 @@ func TestNewClient(t *testing.T) {
 func TestPing(t *testing.T) {
 	log.SetLevel(log.DebugLevel)
 	InitialRedisConfig("127.0.0.1:6379", "", 0)
-	err := RedisConf.Ping()
+	ping, err := RedisConf.Ping()
 	assert.Nil(t, err)
+	fmt.Println(ping)
 }
+
+func TestGetAndSetSeckill(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+	InitialRedisConfig("127.0.0.1:6379", "", 0)
+	RedisConf.Set("seckill_start", "1")
+}
+
+func TestGet(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+	InitialRedisConfig("127.0.0.1:6379", "", 0)
+	test1, err := RedisConf.Get("seckill_start")
+	assert.Nil(t, err)
+	fmt.Println(test1)
+	test, err := RedisConf.Get("LOCK_CONSUME_STOCK")
+	assert.Nil(t, err)
+	fmt.Println(test)
+}
+
 func TestGetAndSet(t *testing.T) {
 	log.SetLevel(log.DebugLevel)
 	InitialRedisConfig("127.0.0.1:6379", "", 0)
