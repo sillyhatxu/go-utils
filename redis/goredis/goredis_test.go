@@ -14,6 +14,12 @@ func TestNewClient(t *testing.T) {
 	assert.NotNil(t, redisClient)
 }
 
+func TestPing(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+	InitialRedisConfig("127.0.0.1:6379", "", 0)
+	err := RedisConf.Ping()
+	assert.Nil(t, err)
+}
 func TestGetAndSet(t *testing.T) {
 	log.SetLevel(log.DebugLevel)
 	InitialRedisConfig("127.0.0.1:6379", "", 0)
