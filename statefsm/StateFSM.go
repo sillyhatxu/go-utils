@@ -7,14 +7,19 @@ import (
 )
 
 type FSMState string
-type FSMEvent string
+
+type FSMEvent struct {
+	EventName  string
+	EventState string
+}
+
 type FSMHandler func() error
 
 //Finite State Machine
 type FSM struct {
 	mu          sync.Mutex
 	state       FSMState
-	flowDiagram map[FSMState][]FSMEvent //State Machine Map
+	flowDiagram map[FSMState]map[FSMEvent]FSMState //State Machine Map
 }
 
 func (f *FSM) setState(newState FSMState) {
@@ -24,18 +29,18 @@ func (f *FSM) setState(newState FSMState) {
 func NewFSM(initState FSMState) *FSM {
 	return &FSM{
 		state:       initState,
-		flowDiagram: make(map[FSMState][]FSMEvent),
+		flowDiagram: make(map[FSMState]map[FSMEvent]FSMState),
 	}
 }
 
-func (f *FSM) AddHandler(state FSMState, events []FSMEvent) *FSM {
+func (f *FSM) AddHandler(state FSMState, event FSMEvent, eventState FSMState) *FSM {
 	if _, ok := f.flowDiagram[state]; !ok {
-		f.flowDiagram[state] = make([]FSMEvent, len(events))
+		f.flowDiagram[state] = make(map[FSMEvent]FSMState)
 	}
-	if _, ok := f.flowDiagram[state]; ok {
-		log.Warnf("The state (%s) event (%s) has been defined.", state, events)
+	if _, ok := f.flowDiagram[state][event]; ok {
+		log.Warnf("The state (%s) event (%s) has been defined.", state, event)
 	}
-	f.flowDiagram[state] = events
+	f.flowDiagram[state][event] = eventState
 	return f
 }
 
