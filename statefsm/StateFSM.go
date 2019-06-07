@@ -7,13 +7,18 @@ import (
 
 type FSMState string
 type FSMEvent string
-type FSMHandler func() FSMState
+
+type FSMInterface interface {
+	Execute() FSMState
+}
+
+//type FSMHandler func() FSMState
 
 //Finite State Machine
 type FSM struct {
 	mu       sync.Mutex
 	state    FSMState
-	handlers map[FSMState]map[FSMEvent]FSMHandler
+	handlers map[FSMState]map[FSMEvent]FSMInterface
 }
 
 func (f *FSM) getState() FSMState {
@@ -27,13 +32,13 @@ func (f *FSM) setState(newState FSMState) {
 func NewFSM(initState FSMState) *FSM {
 	return &FSM{
 		state:    initState,
-		handlers: make(map[FSMState]map[FSMEvent]FSMHandler),
+		handlers: make(map[FSMState]map[FSMEvent]FSMInterface),
 	}
 }
 
-func (f *FSM) AddHandler(state FSMState, event FSMEvent, handler FSMHandler) *FSM {
+func (f *FSM) AddHandler(state FSMState, event FSMEvent, handler FSMInterface) *FSM {
 	if _, ok := f.handlers[state]; !ok {
-		f.handlers[state] = make(map[FSMEvent]FSMHandler)
+		f.handlers[state] = make(map[FSMEvent]FSMInterface)
 	}
 	if _, ok := f.handlers[state][event]; ok {
 		log.Warnf("The state (%s) event (%s) has been defined.", state, event)
@@ -51,7 +56,7 @@ func (f *FSM) Call(event FSMEvent) FSMState {
 	}
 	if fn, ok := events[event]; ok {
 		oldState := f.getState()
-		f.setState(fn())
+		f.setState(fn.Execute())
 		newState := f.getState()
 		log.Infof("State changed from %s to %s", oldState, newState)
 	}

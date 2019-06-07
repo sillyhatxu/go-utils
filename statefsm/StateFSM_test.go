@@ -17,6 +17,14 @@ func NewElectricFan(initState FSMState) *ElectricFan {
 	}
 }
 
+type ElectricFanImpl struct {
+	status FSMState
+}
+
+func (ef ElectricFanImpl) Execute() FSMState {
+	return ef.status
+}
+
 func TestFSM(t *testing.T) {
 	efan := NewElectricFan(Poweroff) // 初始状态是关闭的
 	// 关闭状态
@@ -51,28 +59,32 @@ func TestFSM(t *testing.T) {
 }
 
 var (
-	Poweroff        = FSMState("关闭")
-	FirstGear       = FSMState("1档")
-	SecondGear      = FSMState("2档")
-	ThirdGear       = FSMState("3档")
-	PowerOffEvent   = FSMEvent("按下关闭按钮")
-	FirstGearEvent  = FSMEvent("按下1档按钮")
-	SecondGearEvent = FSMEvent("按下2档按钮")
-	ThirdGearEvent  = FSMEvent("按下3档按钮")
-	PowerOffHandler = FSMHandler(func() FSMState {
-		fmt.Println("电风扇已关闭")
-		return Poweroff
-	})
-	FirstGearHandler = FSMHandler(func() FSMState {
-		fmt.Println("电风扇开启1档，微风徐来！")
-		return FirstGear
-	})
-	SecondGearHandler = FSMHandler(func() FSMState {
-		fmt.Println("电风扇开启2档，凉飕飕！")
-		return SecondGear
-	})
-	ThirdGearHandler = FSMHandler(func() FSMState {
-		fmt.Println("电风扇开启3档，发型被吹乱了！")
-		return ThirdGear
-	})
+	Poweroff          = FSMState("关闭")
+	FirstGear         = FSMState("1档")
+	SecondGear        = FSMState("2档")
+	ThirdGear         = FSMState("3档")
+	PowerOffEvent     = FSMEvent("按下关闭按钮")
+	FirstGearEvent    = FSMEvent("按下1档按钮")
+	SecondGearEvent   = FSMEvent("按下2档按钮")
+	ThirdGearEvent    = FSMEvent("按下3档按钮")
+	PowerOffHandler   = &ElectricFanImpl{status: Poweroff}
+	FirstGearHandler  = &ElectricFanImpl{status: FirstGear}
+	SecondGearHandler = &ElectricFanImpl{status: SecondGear}
+	ThirdGearHandler  = &ElectricFanImpl{status: ThirdGear}
+	//PowerOffHandler = FSMHandler(func() FSMState {
+	//	fmt.Println("电风扇已关闭")
+	//	return Poweroff
+	//})
+	//FirstGearHandler = FSMHandler(func() FSMState {
+	//	fmt.Println("电风扇开启1档，微风徐来！")
+	//	return FirstGear
+	//})
+	//SecondGearHandler = FSMHandler(func() FSMState {
+	//	fmt.Println("电风扇开启2档，凉飕飕！")
+	//	return SecondGear
+	//})
+	//ThirdGearHandler = FSMHandler(func() FSMState {
+	//	fmt.Println("电风扇开启3档，发型被吹乱了！")
+	//	return ThirdGear
+	//})
 )
