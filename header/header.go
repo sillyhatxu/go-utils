@@ -16,7 +16,14 @@ func GetDeviceId(context *gin.Context) string {
 	return ""
 }
 
-func GetCurrentUserId(context *gin.Context, secretKey string) (string, error) {
+func GetCurrentUserId(context *gin.Context, secretKey string, enable bool) (string, error) {
+	if enable {
+		authorization := context.Request.Header["Authorization"]
+		if len(authorization) > 0 {
+			return authorization[0], nil
+		}
+		return "", errors.New("header data error.")
+	}
 	cookie, err := context.Request.Cookie("X-ADV-TOKEN")
 	if err != nil {
 		return "", err
