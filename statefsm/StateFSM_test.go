@@ -1,7 +1,8 @@
 package statefsm
 
 import (
-	"fmt"
+	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -17,74 +18,100 @@ func NewElectricFan(initState FSMState) *ElectricFan {
 	}
 }
 
-type ElectricFanImpl struct {
-	status FSMState
-}
+var (
+	PowerOff   = FSMState("关闭")
+	FirstGear  = FSMState("1档")
+	SecondGear = FSMState("2档")
+	ThirdGear  = FSMState("3档")
 
-func (ef ElectricFanImpl) Execute() FSMState {
-	return ef.status
-}
+	PowerOffEvent   = FSMEvent{EventName: "按下关闭按钮", EventState: PowerOff}
+	FirstGearEvent  = FSMEvent{EventName: "按下1档按钮", EventState: FirstGear}
+	SecondGearEvent = FSMEvent{EventName: "按下2档按钮", EventState: SecondGear}
+	ThirdGearEvent  = FSMEvent{EventName: "按下3档按钮", EventState: ThirdGear}
+)
 
 func TestFSM(t *testing.T) {
-	efan := NewElectricFan(Poweroff) // 初始状态是关闭的
-	// 关闭状态
-	efan.AddHandler(Poweroff, PowerOffEvent, PowerOffHandler)
-	efan.AddHandler(Poweroff, FirstGearEvent, FirstGearHandler)
-	efan.AddHandler(Poweroff, SecondGearEvent, SecondGearHandler)
-	efan.AddHandler(Poweroff, ThirdGearEvent, ThirdGearHandler)
-	// 1档状态
-	efan.AddHandler(FirstGear, PowerOffEvent, PowerOffHandler)
-	efan.AddHandler(FirstGear, FirstGearEvent, FirstGearHandler)
-	efan.AddHandler(FirstGear, SecondGearEvent, SecondGearHandler)
-	efan.AddHandler(FirstGear, ThirdGearEvent, ThirdGearHandler)
-	// 2档状态
-	efan.AddHandler(SecondGear, PowerOffEvent, PowerOffHandler)
-	efan.AddHandler(SecondGear, FirstGearEvent, FirstGearHandler)
-	efan.AddHandler(SecondGear, SecondGearEvent, SecondGearHandler)
-	efan.AddHandler(SecondGear, ThirdGearEvent, ThirdGearHandler)
-	// 3档状态
-	efan.AddHandler(ThirdGear, PowerOffEvent, PowerOffHandler)
-	efan.AddHandler(ThirdGear, FirstGearEvent, FirstGearHandler)
-	efan.AddHandler(ThirdGear, SecondGearEvent, SecondGearHandler)
-	efan.AddHandler(ThirdGear, ThirdGearEvent, ThirdGearHandler)
-
+	efan := NewElectricFan(PowerOff)                                                                        // 初始状态是关闭的
+	efan.AddHandler(PowerOff, []FSMEvent{PowerOffEvent, FirstGearEvent, SecondGearEvent, ThirdGearEvent})   // 关闭状态
+	efan.AddHandler(FirstGear, []FSMEvent{PowerOffEvent, FirstGearEvent, SecondGearEvent, ThirdGearEvent})  // 1档状态
+	efan.AddHandler(SecondGear, []FSMEvent{PowerOffEvent, FirstGearEvent, SecondGearEvent, ThirdGearEvent}) // 2档状态
+	efan.AddHandler(ThirdGear, []FSMEvent{PowerOffEvent, FirstGearEvent, SecondGearEvent, ThirdGearEvent})  // 3档状态
 	// 开始测试状态变化
-	fsmstate := efan.Call(ThirdGearEvent) // 按下3档按钮
-	fmt.Println(fsmstate)
-
-	efan.Call(FirstGearEvent)  // 按下1档按钮
-	efan.Call(PowerOffEvent)   // 按下关闭按钮
-	efan.Call(SecondGearEvent) // 按下2档按钮
-	efan.Call(PowerOffEvent)   // 按下关闭按钮
+	err := efan.Call(ThirdGearEvent, FSMHandler(func() error {
+		log.Println("电风扇开启3档，发型被吹乱了！")
+		return nil
+	})) // 按下3档按钮
+	assert.Nil(t, err)
+	err = efan.Call(FirstGearEvent, FSMHandler(func() error {
+		log.Println("电风扇开启1档，微风徐来！")
+		return nil
+	})) // 按下1档按钮
+	assert.Nil(t, err)
+	err = efan.Call(PowerOffEvent, FSMHandler(func() error {
+		log.Println("电风扇已关闭")
+		return nil
+	})) // 按下关闭按钮
+	assert.Nil(t, err)
+	err = efan.Call(SecondGearEvent, FSMHandler(func() error {
+		log.Println("电风扇开启2档，凉飕飕！")
+		return nil
+	})) // 按下2档按钮
+	assert.Nil(t, err)
+	err = efan.Call(PowerOffEvent, FSMHandler(func() error {
+		log.Println("电风扇已关闭")
+		return nil
+	})) // 按下关闭按钮
+	assert.Nil(t, err)
 }
 
-var (
-	Poweroff          = FSMState("关闭")
-	FirstGear         = FSMState("1档")
-	SecondGear        = FSMState("2档")
-	ThirdGear         = FSMState("3档")
-	PowerOffEvent     = FSMEvent("按下关闭按钮")
-	FirstGearEvent    = FSMEvent("按下1档按钮")
-	SecondGearEvent   = FSMEvent("按下2档按钮")
-	ThirdGearEvent    = FSMEvent("按下3档按钮")
-	PowerOffHandler   = &ElectricFanImpl{status: Poweroff}
-	FirstGearHandler  = &ElectricFanImpl{status: FirstGear}
-	SecondGearHandler = &ElectricFanImpl{status: SecondGear}
-	ThirdGearHandler  = &ElectricFanImpl{status: ThirdGear}
-	//PowerOffHandler = FSMHandler(func() FSMState {
-	//	fmt.Println("电风扇已关闭")
-	//	return Poweroff
-	//})
-	//FirstGearHandler = FSMHandler(func() FSMState {
-	//	fmt.Println("电风扇开启1档，微风徐来！")
-	//	return FirstGear
-	//})
-	//SecondGearHandler = FSMHandler(func() FSMState {
-	//	fmt.Println("电风扇开启2档，凉飕飕！")
-	//	return SecondGear
-	//})
-	//ThirdGearHandler = FSMHandler(func() FSMState {
-	//	fmt.Println("电风扇开启3档，发型被吹乱了！")
-	//	return ThirdGear
-	//})
-)
+func TestFSM2(t *testing.T) {
+	efan := NewElectricFan(PowerOff)                                                       // 初始状态是关闭的
+	efan.AddHandler(PowerOff, []FSMEvent{FirstGearEvent})                                  // 关闭状态
+	efan.AddHandler(FirstGear, []FSMEvent{PowerOffEvent, SecondGearEvent})                 // 1档状态
+	efan.AddHandler(SecondGear, []FSMEvent{PowerOffEvent, FirstGearEvent, ThirdGearEvent}) // 2档状态
+	efan.AddHandler(ThirdGear, []FSMEvent{PowerOffEvent, SecondGearEvent})                 // 3档状态
+	// 开始测试状态变化
+	err := efan.Call(ThirdGearEvent, FSMHandler(func() error {
+		log.Println("电风扇开启3档，发型被吹乱了！")
+		return nil
+	})) // 按下3档按钮
+	assert.NotNil(t, err)
+	assert.EqualValues(t, efan.state, PowerOff)
+
+	err = efan.Call(FirstGearEvent, FSMHandler(func() error {
+		log.Println("电风扇开启1档，微风徐来！")
+		return nil
+	})) // 按下1档按钮
+	assert.Nil(t, err)
+
+	err = efan.Call(ThirdGearEvent, FSMHandler(func() error {
+		log.Println("电风扇开启3档，发型被吹乱了！")
+		return nil
+	})) // 按下3档按钮
+	assert.NotNil(t, err)
+	assert.EqualValues(t, efan.state, FirstGearEvent.EventState)
+
+	err = efan.Call(SecondGearEvent, FSMHandler(func() error {
+		log.Println("电风扇开启2档，凉飕飕！")
+		return nil
+	})) // 按下2档按钮
+	assert.Nil(t, err)
+
+	err = efan.Call(ThirdGearEvent, FSMHandler(func() error {
+		log.Println("电风扇开启3档，发型被吹乱了！")
+		return nil
+	})) // 按下3档按钮
+	assert.Nil(t, err)
+
+	err = efan.Call(PowerOffEvent, FSMHandler(func() error {
+		log.Println("电风扇已关闭")
+		return nil
+	})) // 按下关闭按钮
+	assert.Nil(t, err)
+
+	err = efan.Call(PowerOffEvent, FSMHandler(func() error {
+		log.Println("电风扇已关闭")
+		return nil
+	})) // 按下关闭按钮
+	assert.NotNil(t, err)
+}

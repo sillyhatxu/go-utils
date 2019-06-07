@@ -7,19 +7,17 @@ import (
 )
 
 type FSMState string
-
 type FSMEvent struct {
 	EventName  string
-	EventState string
+	EventState FSMState
 }
-
 type FSMHandler func() error
 
 //Finite State Machine
 type FSM struct {
 	mu          sync.Mutex
 	state       FSMState
-	flowDiagram map[FSMState]map[FSMEvent]FSMState //State Machine Map
+	flowDiagram map[FSMState][]FSMEvent //State Machine Map
 }
 
 func (f *FSM) setState(newState FSMState) {
@@ -29,24 +27,27 @@ func (f *FSM) setState(newState FSMState) {
 func NewFSM(initState FSMState) *FSM {
 	return &FSM{
 		state:       initState,
-		flowDiagram: make(map[FSMState]map[FSMEvent]FSMState),
+		flowDiagram: make(map[FSMState][]FSMEvent),
 	}
 }
 
-func (f *FSM) AddHandler(state FSMState, event FSMEvent, eventState FSMState) *FSM {
+func (f *FSM) AddHandler(state FSMState, events []FSMEvent) *FSM {
 	if _, ok := f.flowDiagram[state]; !ok {
-		f.flowDiagram[state] = make(map[FSMEvent]FSMState)
+		f.flowDiagram[state] = make([]FSMEvent, len(events))
 	}
-	if _, ok := f.flowDiagram[state][event]; ok {
-		log.Warnf("The state (%s) event (%s) has been defined.", state, event)
+	if _, ok := f.flowDiagram[state]; ok {
+		log.Warnf("The state (%s) event (%s) has been defined.", state, events)
 	}
-	f.flowDiagram[state][event] = eventState
+	f.flowDiagram[state] = events
 	return f
 }
 
 func (f *FSM) Call(event FSMEvent, fsmHandler FSMHandler) error {
 	if f == nil || f.state == "" {
 		return errors.New("FSM data error.")
+	}
+	if event.EventState == "" {
+		return errors.New("EventState is nil.")
 	}
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -55,17 +56,11 @@ func (f *FSM) Call(event FSMEvent, fsmHandler FSMHandler) error {
 		return errors.New("Event undefined. State : " + string(f.state))
 	}
 	for _, e := range events {
-		if e == event {
-			f.setState(event)
+		if e.EventName == event.EventName {
+			log.Infof("State changed from %s to %s", f.state, event.EventState)
+			f.setState(event.EventState)
 			return fsmHandler()
 		}
 	}
-
-	if fn, ok := events[event]; ok {
-		oldState := f.getState()
-		f.setState(fn.Execute())
-		newState := f.getState()
-		log.Infof("State changed from %s to %s", oldState, newState)
-	}
-	return f.getState()
+	return errors.New("State transition error." + string(f.state) + " -> " + string(event.EventState))
 }
