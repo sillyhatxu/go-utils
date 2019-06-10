@@ -6,34 +6,29 @@ import (
 	"sync"
 )
 
-type FSMState string
-type FSMEvent struct {
-	EventName  string
-	EventState FSMState
-}
-type FSMHandler func() error
+type FSMHandler func() (string, error)
 
 //Finite State Machine
 type FSM struct {
-	mu          sync.Mutex
-	state       FSMState
-	flowDiagram map[FSMState][]FSMEvent //State Machine Map
+	mu           sync.Mutex
+	currentState string
+	flowDiagram  map[string][]string //State Machine Map  {key:state,value:event}
 }
 
-func (f *FSM) setState(newState FSMState) {
-	f.state = newState
+func (f *FSM) setState(newState string) {
+	f.currentState = newState
 }
 
-func NewFSM(initState FSMState) *FSM {
+func NewFSM(initState string) *FSM {
 	return &FSM{
-		state:       initState,
-		flowDiagram: make(map[FSMState][]FSMEvent),
+		currentState: initState,
+		flowDiagram:  make(map[string][]string),
 	}
 }
 
-func (f *FSM) AddHandler(state FSMState, events []FSMEvent) *FSM {
+func (f *FSM) AddHandler(state string, events []string) *FSM {
 	if _, ok := f.flowDiagram[state]; !ok {
-		f.flowDiagram[state] = make([]FSMEvent, len(events))
+		f.flowDiagram[state] = make([]string, len(events))
 	}
 	if _, ok := f.flowDiagram[state]; ok {
 		log.Warnf("The state (%s) event (%s) has been defined.", state, events)
@@ -42,25 +37,29 @@ func (f *FSM) AddHandler(state FSMState, events []FSMEvent) *FSM {
 	return f
 }
 
-func (f *FSM) Call(event FSMEvent, fsmHandler FSMHandler) error {
-	if f == nil || f.state == "" {
+func (f *FSM) Call(event string, fsmHandler FSMHandler) error {
+	if f == nil || f.currentState == "" {
 		return errors.New("FSM data error.")
 	}
-	if event.EventState == "" {
+	if event == "" {
 		return errors.New("EventState is nil.")
 	}
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	events := f.flowDiagram[f.state]
+	events := f.flowDiagram[f.currentState]
 	if events == nil || len(events) == 0 {
-		return errors.New("Event undefined. State : " + string(f.state))
+		return errors.New("Event undefined. State : " + f.currentState)
 	}
 	for _, e := range events {
-		if e.EventName == event.EventName {
-			log.Infof("State changed from %s to %s", f.state, event.EventState)
-			f.setState(event.EventState)
-			return fsmHandler()
+		if e == event {
+			log.Infof("State changed from %s to %s", f.currentState, event)
+			state, err := fsmHandler()
+			if err != nil {
+				return err
+			}
+			f.setState(state)
+			return nil
 		}
 	}
-	return errors.New("State transition error." + string(f.state) + " -> " + string(event.EventState))
+	return errors.New("State transition error." + f.currentState + " -> " + event)
 }
