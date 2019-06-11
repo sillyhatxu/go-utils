@@ -46,8 +46,9 @@ type GoHttpRequest struct {
 	//bindResponseBody interface{}
 }
 
-func New(url string) *GoHttpRequest {
+func New(host, url string) *GoHttpRequest {
 	gr := &GoHttpRequest{
+		Host:       host,
 		URL:        url,
 		HttpClient: getDefaultHttpClient(),
 		Data:       make(map[string]interface{}),
@@ -75,8 +76,12 @@ func getDefaultHttpClient() *http.Client {
 	return client
 }
 
+func (ghr GoHttpRequest) getURL() string {
+	return ghr.Host + ghr.URL
+}
+
 func (ghr GoHttpRequest) HttpGet() (*http.Response, error) {
-	req, err := http.NewRequest(GET, ghr.URL, nil)
+	req, err := http.NewRequest(GET, ghr.getURL(), nil)
 	if err != nil {
 		return nil, err
 	}
