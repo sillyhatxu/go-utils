@@ -3,6 +3,7 @@ package goredis
 import (
 	"github.com/go-redis/redis"
 	log "github.com/sirupsen/logrus"
+	"time"
 )
 
 var RedisConf RedisConfig
@@ -69,8 +70,29 @@ func (rc RedisConfig) Set(key, value string) error {
 func (rc RedisConfig) Exists(key string) (bool, error) {
 	client, err := rc.GetClient()
 	if err != nil {
-		panic(err)
+		return false, err
 	}
 	count := client.Exists(key).Val()
 	return count > 0, nil
+}
+
+func (rc RedisConfig) Expire(key string, expiration time.Duration) error {
+	client, err := rc.GetClient()
+	if err != nil {
+		return err
+	}
+	err = client.Expire(key, expiration).Err()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (rc RedisConfig) Incr(key string) (int64, error) {
+	client, err := rc.GetClient()
+	if err != nil {
+		return 0, err
+	}
+	seq := client.Incr(key).Val()
+	return seq, nil
 }
