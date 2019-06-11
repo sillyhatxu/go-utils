@@ -1,5 +1,10 @@
 package response
 
+import (
+	"encoding/json"
+	"fmt"
+)
+
 type ResponseEntity struct {
 	Code ResponseCode `json:"code"`
 	Data interface{}  `json:"data"`
@@ -44,4 +49,19 @@ func ErrorImproperOperationError(data interface{}, msg string) *ResponseEntity {
 
 func ErrorUnauthorizedErrore(data interface{}, msg string) *ResponseEntity {
 	return &ResponseEntity{Code: UNAUTHORIZED_ERROR, Data: data, Msg: msg}
+}
+
+type ResponseError struct {
+	Code  string      `json:"code"`
+	Data  interface{} `json:"data"`
+	Msg   string      `json:"message"`
+	Extra interface{} `json:"extra"`
+}
+
+func (re *ResponseError) Error() string {
+	reJSON, err := json.Marshal(re)
+	if err != nil {
+		return fmt.Sprintf(`{"code": "%v", "data": "", "message": "%v","extra": "ResponseError to json error."}`, re.Code, re.Msg)
+	}
+	return string(reJSON)
 }
