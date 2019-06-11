@@ -17,7 +17,7 @@ func GetDeviceId(context *gin.Context) string {
 }
 
 func GetCurrentUserId(context *gin.Context, secretKey string, enable bool) (string, error) {
-	if enable {
+	if !enable {
 		authorization := context.Request.Header["Authorization"]
 		if len(authorization) > 0 {
 			return authorization[0], nil
