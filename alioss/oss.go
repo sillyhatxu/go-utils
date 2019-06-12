@@ -43,20 +43,27 @@ type Photo struct {
 	URL string `json:"url"`
 }
 
-func (client OssClient) GetDefaultImageURL(url string) (string, error) {
+func (client OssClient) GetDefaultImageURL(url string) (*Photo, error) {
 	return client.GetSizeImageURL(url, IMAGE_SIZE_MEDIAN)
 }
 
-func (client OssClient) GetSizeImageURL(fullpath string, size int) (string, error) {
+func (client OssClient) GetSizeImageURL(fullpath string, size int) (*Photo, error) {
 	ossClient, err := client.getClient()
 	bucket, err := ossClient.Bucket(client.ImageBucket)
 	if err != nil {
-		return "", nil
+		return nil, nil
 	}
 	process := fmt.Sprintf("image/resize,m_lfit,l_%d/format,%s", size, IMAGE_FORMAT_JPEG)
 	signedURL, err := bucket.SignURL(fullpath, oss.HTTPGet, expiredInSec, oss.Process(process))
 	if err != nil {
-		return "", nil
+		return nil, nil
 	}
-	return url.PathUnescape(signedURL)
+	imageURL, err := url.PathUnescape(signedURL)
+	if err != nil {
+		return nil, nil
+	}
+	return &Photo{
+		FullPath: fullpath,
+		URL:      imageURL,
+	}, nil
 }
