@@ -6,9 +6,10 @@ import (
 )
 
 type ResponseEntity struct {
-	Code ResponseCode `json:"code"`
-	Data interface{}  `json:"data"`
-	Msg  string       `json:"message"`
+	Code  ResponseCode `json:"code"`
+	Data  interface{}  `json:"data"`
+	Msg   string       `json:"message"`
+	Extra interface{}  `json:"extra"`
 }
 
 type ResponseCode string
