@@ -24,6 +24,7 @@ type HttpResponseEntity struct {
 type GoHttpRequest struct {
 	URL           string
 	Host          string
+	Body          []byte
 	Header        map[string]string
 	Data          map[string]interface{}
 	HttpClient    *http.Client
@@ -85,7 +86,17 @@ func (ghr GoHttpRequest) HttpGet() (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Content-Type", `application/json`)
+	//req.Header.Add("Content-Type", `application/json`)
+	req.Header.Set("Content-Type", "application/json")
+	return ghr.HttpClient.Do(req)
+}
+
+func (ghr GoHttpRequest) HttpPost() (*http.Response, error) {
+	req, err := http.NewRequest(POST, ghr.getURL(), bytes.NewBuffer(ghr.Body))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
 	return ghr.HttpClient.Do(req)
 }
 
