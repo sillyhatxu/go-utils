@@ -265,7 +265,7 @@ func (client *ClientConfig) BatchUpdate(callback BatchCallback) error {
 	return nil
 }
 
-func (client *ClientConfig) Count(sql string) (int64, error) {
+func (client *ClientConfig) Count(sql string, args ...interface{}) (int64, error) {
 	db, err := client.getConnection()
 	if err != nil {
 		log.Errorf("mysql get connection error. %v", err)
@@ -279,7 +279,7 @@ func (client *ClientConfig) Count(sql string) (int64, error) {
 	}
 	defer tx.Commit()
 	var count int64
-	countErr := tx.QueryRow(sql).Scan(&count)
+	countErr := tx.QueryRow(sql, args...).Scan(&count)
 	if countErr != nil {
 		log.Errorf("Query count error. %v", err)
 		return 0, err
