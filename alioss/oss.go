@@ -3,7 +3,6 @@ package alioss
 import (
 	"fmt"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
-	"net/url"
 )
 
 const (
@@ -13,6 +12,7 @@ const (
 	expiredInSec      = 604800 //7 days
 	IMAGE_FORMAT_PNG  = "png"
 	IMAGE_FORMAT_JPEG = "jpeg"
+	IMAGE_FORMAT_JPG  = "jpg"
 )
 
 type OssClient struct {
@@ -53,17 +53,17 @@ func (client OssClient) GetSizeImageURL(fullpath string, size int) (*Photo, erro
 	if err != nil {
 		return nil, nil
 	}
+	//image/resize,m_lfit,l_720/format,jpeg
+	//image/resize,m_lfit,l_720/format,jpeg
 	process := fmt.Sprintf("image/resize,m_lfit,l_%d/format,%s", size, IMAGE_FORMAT_JPEG)
+	//process := fmt.Sprintf("image/resize,m_lfit,l_%d/format,%s", size, IMAGE_FORMAT_JPG)
+	//process := fmt.Sprintf("image/resize,m_lfit,l_%d/format,%s", size, IMAGE_FORMAT_PNG)
 	signedURL, err := bucket.SignURL(fullpath, oss.HTTPGet, expiredInSec, oss.Process(process))
-	if err != nil {
-		return nil, nil
-	}
-	imageURL, err := url.PathUnescape(signedURL)
 	if err != nil {
 		return nil, nil
 	}
 	return &Photo{
 		FullPath: fullpath,
-		URL:      imageURL,
+		URL:      signedURL,
 	}, nil
 }
