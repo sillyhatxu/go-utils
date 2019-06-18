@@ -35,14 +35,13 @@ func GetAcceptLanguage(context *gin.Context) language.Tag {
 }
 
 type ResponseMessage struct {
-	Context *gin.Context
-	MsgZH   string
-	MsgEN   string
-	MsgID   string
+	MsgZH string
+	MsgEN string
+	MsgID string
 }
 
-func (rm ResponseMessage) GetResponseMessage() string {
-	tag := GetAcceptLanguage(rm.Context)
+func (rm ResponseMessage) GetResponseMessage(context *gin.Context) string {
+	tag := GetAcceptLanguage(context)
 	switch tag {
 	case language.Indonesian:
 		return rm.MsgID
