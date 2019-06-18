@@ -31,7 +31,7 @@ func (pc ProducerConf) Send(producer interface{}) error {
 	}
 	conn, err := amqp.Dial(rmqc.URL)
 	if err != nil {
-		log.Error("Connection RabbitMQ error.", err)
+		log.Errorf("Connection [%v] RabbitMQ error.", rmqc.URL, err)
 		return err
 	}
 	defer conn.Close()
