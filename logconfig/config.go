@@ -27,22 +27,35 @@ func (h *DefaultFieldHook) Fire(e *log.Entry) error {
 	return nil
 }
 
-type LogConfig struct {
-	LogLevel        log.Level
-	ReportCaller    bool
-	Project         string
-	Module          string
-	OpenLogstash    bool
-	LogstashAddress string
-	OpenLogfile     bool
-	FilePath        string
+type logConfig struct {
+	logLevel        log.Level
+	reportCaller    bool
+	project         string
+	module          string
+	openLogstash    bool
+	logstashAddress string
+	openLogfile     bool
+	filePath        string
 }
 
-func (lc LogConfig) String() string {
+func NewLogConfig(logLevel log.Level, reportCaller bool, project string, module string, openLogstash bool, logstashAddress string, openLogfile bool, filePath string) *logConfig {
+	return &logConfig{
+		logLevel:        logLevel,
+		reportCaller:    reportCaller,
+		project:         project,
+		module:          module,
+		openLogstash:    openLogstash,
+		logstashAddress: logstashAddress,
+		openLogfile:     openLogfile,
+		filePath:        filePath,
+	}
+}
+
+func (lc logConfig) String() string {
 	return fmt.Sprintf(`LogConfig{Project='%s', Module='%s', OpenLogstash=%t, LogstashAddress='%s', OpenLogfile=%t, FilePath='%s'}`, lc.Project, lc.Module, lc.OpenLogstash, lc.LogstashAddress, lc.OpenLogfile, lc.FilePath)
 }
 
-func (lc LogConfig) InitialLogConfig() {
+func (lc logConfig) InitialLogConfig() {
 	logger.Println("InitialLogConfig :", lc)
 	logFormatter := &log.JSONFormatter{
 		TimestampFormat: time.RFC3339Nano,
@@ -53,24 +66,24 @@ func (lc LogConfig) InitialLogConfig() {
 		},
 	}
 	log.SetOutput(os.Stdout)
-	log.SetLevel(lc.LogLevel)
-	log.SetReportCaller(lc.ReportCaller)
+	log.SetLevel(lc.logLevel)
+	log.SetReportCaller(lc.reportCaller)
 	log.SetFormatter(logFormatter)
-	log.AddHook(&DefaultFieldHook{project: lc.Project, module: lc.Module})
-	if lc.OpenLogstash {
-		conn, err := net.Dial("tcp", lc.LogstashAddress)
+	log.AddHook(&DefaultFieldHook{project: lc.project, module: lc.module})
+	if lc.openLogstash {
+		conn, err := net.Dial("tcp", lc.logstashAddress)
 		if err != nil {
-			logger.Panicf("net.Dial('tcp', %v); Error : %v", lc.LogstashAddress, err)
+			logger.Panicf("net.Dial('tcp', %v); Error : %v", lc.logstashAddress, err)
 		}
-		hook := logrustash.New(conn, logrustash.DefaultFormatter(log.Fields{"project": lc.Project, "module": lc.Module}))
+		hook := logrustash.New(conn, logrustash.DefaultFormatter(log.Fields{"project": lc.project, "module": lc.module}))
 		log.AddHook(hook)
 	}
-	if lc.OpenLogfile {
-		path := lc.FilePath + lc.Module + ".log"
+	if lc.openLogfile {
+		path := lc.filePath + lc.module + ".log"
 		WithMaxAge := time.Duration(876000) * time.Hour
 		WithRotationTime := time.Duration(24) * time.Hour
 		infoWriter, err := rotatelogs.New(
-			lc.FilePath+"info.log.%Y%m%d",
+			lc.filePath+"info.log.%Y%m%d",
 			rotatelogs.WithLinkName(path),
 			rotatelogs.WithMaxAge(WithMaxAge),
 			rotatelogs.WithRotationTime(WithRotationTime),
@@ -79,7 +92,7 @@ func (lc LogConfig) InitialLogConfig() {
 			logger.Panicf("rotatelogs.New [info writer] error; Error : %v", err)
 		}
 		errorWriter, err := rotatelogs.New(
-			lc.FilePath+"error.log.%Y%m%d",
+			lc.filePath+"error.log.%Y%m%d",
 			rotatelogs.WithLinkName(path),
 			rotatelogs.WithMaxAge(WithMaxAge),
 			rotatelogs.WithRotationTime(WithRotationTime),
