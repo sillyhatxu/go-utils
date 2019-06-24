@@ -52,7 +52,7 @@ func NewLogConfig(logLevel log.Level, reportCaller bool, project string, module 
 }
 
 func (lc logConfig) String() string {
-	return fmt.Sprintf(`LogConfig{Project='%s', Module='%s', OpenLogstash=%t, LogstashAddress='%s', OpenLogfile=%t, FilePath='%s'}`, lc.Project, lc.Module, lc.OpenLogstash, lc.LogstashAddress, lc.OpenLogfile, lc.FilePath)
+	return fmt.Sprintf(`logConfig{logLevel='%s', reportCaller=%t, project='%s', module='%s', openLogstash=%t, logstashAddress='%s', openLogfile=%t, filePath='%s'}`, lc.logLevel, lc.reportCaller, lc.project, lc.module, lc.openLogstash, lc.logstashAddress, lc.openLogfile, lc.filePath)
 }
 
 func (lc logConfig) InitialLogConfig() {
