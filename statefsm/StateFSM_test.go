@@ -4,6 +4,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 )
 
 // 电风扇
@@ -35,6 +36,9 @@ var (
 	ThirdGearEvent  = "按下3档按钮"
 )
 
+func TestOut(t *testing.T) {
+	log.Info(time.Now().Unix())
+}
 func TestFSM(t *testing.T) {
 	efan := NewElectricFan(PowerOff)                                                                      // 初始状态是关闭的
 	efan.AddHandler(PowerOff, []string{PowerOffEvent, FirstGearEvent, SecondGearEvent, ThirdGearEvent})   // 关闭状态
