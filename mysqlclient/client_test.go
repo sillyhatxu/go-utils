@@ -45,7 +45,7 @@ const (
 	`
 
 	count_sql = `
-		select count(1) from userinfo
+		select count(1) from userinfo where age > ?
 	`
 
 	findByParams_sql = `
@@ -240,10 +240,10 @@ func TestClientFind(t *testing.T) {
 
 func TestClientCount(t *testing.T) {
 	InitialDBClient(dataSourceName, maxIdleConns, maxOpenConns)
-	count, err := Client.Count(count_sql)
+	count, err := Client.Count(count_sql, 25)
 	log.Println("count : ", count)
 	assert.Nil(t, err)
-	assert.EqualValues(t, count, 981)
+	assert.EqualValues(t, count, 3)
 }
 
 func TestClientDelete(t *testing.T) {

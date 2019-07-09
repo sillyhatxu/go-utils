@@ -79,6 +79,9 @@ func (lc logConfig) InitialLogConfig() {
 		log.AddHook(hook)
 	}
 	if lc.openLogfile {
+		if exists(lc.filePath + lc.module + "/") {
+
+		}
 		path := lc.filePath + lc.module + ".log"
 		WithMaxAge := time.Duration(876000) * time.Hour
 		WithRotationTime := time.Duration(24) * time.Hour
@@ -116,4 +119,16 @@ func (lc logConfig) InitialLogConfig() {
 			logFormatter,
 		))
 	}
+}
+
+//判断所给路径文件/文件夹是否存在
+func exists(path string) bool {
+	_, err := os.Stat(path) //os.Stat获取文件信息
+	if err != nil {
+		if os.IsExist(err) {
+			return true
+		}
+		return false
+	}
+	return true
 }
