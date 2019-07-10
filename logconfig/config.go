@@ -79,9 +79,6 @@ func (lc logConfig) InitialLogConfig() {
 		log.AddHook(hook)
 	}
 	if lc.openLogfile {
-		if exists(lc.filePath + lc.module + "/") {
-
-		}
 		path := lc.filePath + lc.module + ".log"
 		WithMaxAge := time.Duration(876000) * time.Hour
 		WithRotationTime := time.Duration(24) * time.Hour
@@ -94,6 +91,14 @@ func (lc logConfig) InitialLogConfig() {
 		if err != nil {
 			logger.Panicf("rotatelogs.New [info writer] error; Error : %v", err)
 		}
+		log.AddHook(lfshook.NewHook(
+			lfshook.WriterMap{
+				log.InfoLevel:  infoWriter,
+				log.WarnLevel:  infoWriter,
+				log.ErrorLevel: infoWriter,
+			},
+			logFormatter,
+		))
 		errorWriter, err := rotatelogs.New(
 			lc.filePath+"error.log.%Y%m%d",
 			rotatelogs.WithLinkName(path),
@@ -105,20 +110,20 @@ func (lc logConfig) InitialLogConfig() {
 		}
 		log.AddHook(lfshook.NewHook(
 			lfshook.WriterMap{
-				log.InfoLevel:  infoWriter,
-				log.WarnLevel:  infoWriter,
-				log.ErrorLevel: infoWriter,
-			},
-			logFormatter,
-		))
-		log.AddHook(lfshook.NewHook(
-			lfshook.WriterMap{
 				log.WarnLevel:  errorWriter,
 				log.ErrorLevel: errorWriter,
 			},
 			logFormatter,
 		))
 	}
+}
+
+func createFolder(path string) error {
+	err := os.Mkdir(path, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 //判断所给路径文件/文件夹是否存在

@@ -2,13 +2,12 @@ package config
 
 import (
 	"bytes"
-	"github.com/BurntSushi/toml"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 )
 
-func ParseConfig(configFile string, input interface{}) {
+func ParseConfig(configFile string, unmarshalfunc func([]byte)) {
 	if fileInfo, err := os.Stat(configFile); err != nil {
 		if os.IsNotExist(err) {
 			log.Panicf("configuration file [%v] does not exist.", configFile)
@@ -20,15 +19,10 @@ func ParseConfig(configFile string, input interface{}) {
 			log.Panicf("%v is a directory name", configFile)
 		}
 	}
-
 	content, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		log.Panicf("read configuration file error. %v", err)
 	}
 	content = bytes.TrimSpace(content)
-
-	err = toml.Unmarshal(content, &input)
-	if err != nil {
-		log.Panicf("unmarshal toml object error. %v", err)
-	}
+	unmarshalfunc(content)
 }
