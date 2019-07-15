@@ -27,6 +27,7 @@ func main() {
 	//fmt.Println(dataSign)
 	fmt.Println(test)
 	fmt.Println(test == dataSign)
+	testPost()
 }
 
 func encrypt(dataString string) (string, error) {
@@ -53,7 +54,7 @@ func testPost() {
 	if err != nil {
 		panic(err)
 	}
-	req.Header.Set("content-type", "application/x-www-form-urlencoded")
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	response, err := httpclient.Do(req)
 	if err != nil {
 		panic(err)
