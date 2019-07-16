@@ -30,3 +30,7 @@ func FormatLocation(t time.Time) string {
 func FormatTimestamp(i int64) time.Time {
 	return time.Unix(0, i*int64(time.Millisecond))
 }
+
+func ToMillisecond(t time.Time) int64 {
+	return t.UnixNano() / int64(time.Millisecond)
+}
