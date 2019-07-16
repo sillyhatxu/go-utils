@@ -26,3 +26,7 @@ func ParseTimeInLocation(value string) (time.Time, error) {
 func FormatLocation(t time.Time) string {
 	return t.Format(LayoutTime)
 }
+
+func FormatTimestamp(i int64) time.Time {
+	return time.Unix(0, i*int64(time.Millisecond))
+}
