@@ -7,7 +7,7 @@ import (
 )
 
 func TestFormatTimestamp(t *testing.T) {
-	Time := FormatTimestamp(1438167001716)
+	Time := FormatTimestamp(1563609600000)
 	assert.NotNil(t, Time)
 	fmt.Println(FormatLocation(Time))
 }
