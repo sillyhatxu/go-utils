@@ -23,7 +23,7 @@ type Config struct {
 
 func New(url string) *Config {
 	return &Config{
-		URL: "",
+		URL: url,
 		QueueConfig: QueueConfig{
 			Arguments: amqp.Table{
 				"name":  "x-message-ttl",
