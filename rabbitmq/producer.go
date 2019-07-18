@@ -32,11 +32,11 @@ func (pc ProducerConf) Send(producer interface{}) error {
 	log.Info(string(producerJSON))
 	if len(producerJSON) <= 2 {
 		//JSON is "{}"
-		return errors.New("Struct to json error.")
+		return errors.New("Producer to json error.")
 	}
 	conn, err := amqp.Dial(pc.MQConfig.URL)
 	if err != nil {
-		log.Errorf("Connection [%v] RabbitMQ error.", pc.MQConfig.URL, err)
+		log.Errorf("Connection [ %v ] RabbitMQ error.", pc.MQConfig.URL, err)
 		return err
 	}
 	defer conn.Close()
