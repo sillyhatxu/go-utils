@@ -17,7 +17,7 @@ type ConsumerConf struct {
 }
 
 func (cc ConsumerConf) String() string {
-	return fmt.Sprintf("{ QueueValue : %s, Exchange : %s, RoutingKey : %s }", cc.QueueValue, cc.Exchange, cc.RoutingKey)
+	return fmt.Sprintf("ConsumerConf{QueueValue: %s, Exchange: %s, RoutingKey: %s ;MQConfig: %v}", cc.QueueValue, cc.Exchange, cc.RoutingKey, cc.MQConfig)
 }
 
 type ConsumerInterface interface {

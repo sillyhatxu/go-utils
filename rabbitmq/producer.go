@@ -17,14 +17,14 @@ type ProducerConf struct {
 }
 
 func (pc ProducerConf) String() string {
-	return fmt.Sprintf("{ Exchange : %s, RoutingKey : %s }", pc.Exchange, pc.RoutingKey)
+	return fmt.Sprintf("ProducerConf{Exchange: %s; RoutingKey: %s; MQConfig: %v}", pc.Exchange, pc.RoutingKey, pc.MQConfig)
 }
 
 func (pc ProducerConf) Send(producer interface{}) error {
 	if pc.MQConfig == nil {
 		return fmt.Errorf("MQ Config is nil.")
 	}
-	log.Infof("RabbitMQ ProducerConf{Exchange: %s; RoutingKey: %s; MQConfig: %v;} : %v", pc.Exchange, pc.RoutingKey, pc.MQConfig)
+	log.Infof("RabbitMQ ProducerConf :", pc.Exchange, pc.RoutingKey, pc.MQConfig)
 	producerJSON, err := json.Marshal(producer)
 	if err != nil {
 		return err
