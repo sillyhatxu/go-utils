@@ -36,7 +36,7 @@ func TestProducer(t *testing.T) {
 	mqConfig := New("amqp://username:password@127.0.0.1:5672/")
 	exchange := "exchange.teste"
 	routingKey := "routing.key.test" // Key 相当于 kafka topic
-	producer := ProducerConf{Exchange: exchange, RoutingKey: routingKey, MqConfig: mqConfig}
+	producer := ProducerConf{Exchange: exchange, RoutingKey: routingKey, MQConfig: mqConfig}
 	i := 1
 	for {
 		err := producer.Send(MqGroupDTO{
@@ -54,4 +54,21 @@ func TestProducer(t *testing.T) {
 		}
 		time.Sleep(5 * time.Second)
 	}
+}
+
+func TestProducer1(t *testing.T) {
+	mqConfig := New("amqp://username:password@127.0.0.1:5672/")
+	exchange := "exchange.test"
+	routingKey := "test.group.status.change" // Key 相当于 kafka topic
+	producer := ProducerConf{Exchange: exchange, RoutingKey: routingKey, MQConfig: mqConfig}
+	err := producer.Send(MqGroupDTO{
+		Id:          "GB28661706006788428864702515052",
+		Status:      "FULL",
+		OwnerId:     "U5C8B1E0C2C4E6400019EC5B1",
+		OrderId:     "",
+		GroupType:   "GROUP_BUY",
+		ProductId:   "P7998002600511815841",
+		ProductName: "ProductName",
+	})
+	assert.Nil(t, err)
 }

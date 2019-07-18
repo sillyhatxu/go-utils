@@ -13,7 +13,7 @@ func TestConsumer(t *testing.T) {
 	exchange := "exchange.teste"
 	routingKey := "routing.key.test" // Key 相当于 kafka topic
 	queueValue := "queue.value.test" //相当于  kafka group
-	consumer := ConsumerConf{QueueValue: queueValue, Exchange: exchange, RoutingKey: routingKey, MqConfig: mqConfig}
+	consumer := ConsumerConf{QueueValue: queueValue, Exchange: exchange, RoutingKey: routingKey, MQConfig: mqConfig}
 	err := consumer.Consumer(ConsumerMessage{})
 	assert.Nil(t, err)
 }

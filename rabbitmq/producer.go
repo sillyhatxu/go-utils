@@ -13,7 +13,7 @@ type ProducerConf struct {
 
 	RoutingKey string // Key 相当于 kafka topic
 
-	MqConfig *Config
+	MQConfig *Config
 }
 
 func (pc ProducerConf) String() string {
@@ -21,6 +21,9 @@ func (pc ProducerConf) String() string {
 }
 
 func (pc ProducerConf) Send(producer interface{}) error {
+	if pc.MQConfig == nil {
+		return fmt.Errorf("MQ Config is nil.")
+	}
 	log.Infof("RabbitMQ ProducerConf : %v", pc)
 	producerJSON, err := json.Marshal(producer)
 	if err != nil {
@@ -31,9 +34,9 @@ func (pc ProducerConf) Send(producer interface{}) error {
 		//JSON is "{}"
 		return errors.New("Struct to json error.")
 	}
-	conn, err := amqp.Dial(pc.MqConfig.URL)
+	conn, err := amqp.Dial(pc.MQConfig.URL)
 	if err != nil {
-		log.Errorf("Connection [%v] RabbitMQ error.", pc.MqConfig.URL, err)
+		log.Errorf("Connection [%v] RabbitMQ error.", pc.MQConfig.URL, err)
 		return err
 	}
 	defer conn.Close()
@@ -45,11 +48,11 @@ func (pc ProducerConf) Send(producer interface{}) error {
 	defer ch.Close()
 	q, err := ch.QueueDeclare(
 		pc.RoutingKey,                      // name
-		pc.MqConfig.QueueConfig.Durable,    // durable
-		pc.MqConfig.QueueConfig.AutoDelete, // delete when unused
-		pc.MqConfig.QueueConfig.Exclusive,  // exclusive
-		pc.MqConfig.QueueConfig.NoWait,     // no-wait
-		pc.MqConfig.QueueConfig.Arguments,  // arguments
+		pc.MQConfig.QueueConfig.Durable,    // durable
+		pc.MQConfig.QueueConfig.AutoDelete, // delete when unused
+		pc.MQConfig.QueueConfig.Exclusive,  // exclusive
+		pc.MQConfig.QueueConfig.NoWait,     // no-wait
+		pc.MQConfig.QueueConfig.Arguments,  // arguments
 	)
 	if err != nil {
 		log.Error("Get RabbitMQ queue error.", err)
@@ -58,8 +61,8 @@ func (pc ProducerConf) Send(producer interface{}) error {
 	err = ch.Publish(
 		pc.Exchange,                       // exchange
 		q.Name,                            // routing key
-		pc.MqConfig.QueueConfig.Mandatory, // mandatory
-		pc.MqConfig.QueueConfig.Immediate, // immediate
+		pc.MQConfig.QueueConfig.Mandatory, // mandatory
+		pc.MQConfig.QueueConfig.Immediate, // immediate
 		amqp.Publishing{
 			ContentType: "text/plain",
 			Body:        []byte(producerJSON),
