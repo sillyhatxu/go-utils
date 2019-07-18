@@ -24,7 +24,7 @@ func (pc ProducerConf) Send(producer interface{}) error {
 	if pc.MQConfig == nil {
 		return fmt.Errorf("MQ Config is nil.")
 	}
-	log.Infof("RabbitMQ ProducerConf : %v", pc)
+	log.Infof("RabbitMQ ProducerConf{Exchange: %s; RoutingKey: %s; MQConfig: %v;} : %v", pc.Exchange, pc.RoutingKey, pc.MQConfig)
 	producerJSON, err := json.Marshal(producer)
 	if err != nil {
 		return err
