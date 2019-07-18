@@ -9,11 +9,11 @@ import (
 )
 
 func TestConsumer(t *testing.T) {
-	SetURL("amqp://username:password@127.0.0.1:5672/")
+	mqConfig := New("amqp://username:password@127.0.0.1:5672/")
 	exchange := "exchange.teste"
 	routingKey := "routing.key.test" // Key 相当于 kafka topic
 	queueValue := "queue.value.test" //相当于  kafka group
-	consumer := ConsumerConf{QueueValue: queueValue, Exchange: exchange, RoutingKey: routingKey}
+	consumer := ConsumerConf{QueueValue: queueValue, Exchange: exchange, RoutingKey: routingKey, MqConfig: mqConfig}
 	err := consumer.Consumer(ConsumerMessage{})
 	assert.Nil(t, err)
 }

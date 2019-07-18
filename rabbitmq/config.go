@@ -4,10 +4,6 @@ import (
 	"github.com/streadway/amqp"
 )
 
-var (
-	rmqc = New()
-)
-
 type QueueConfig struct {
 	Arguments  amqp.Table
 	Durable    bool
@@ -25,7 +21,7 @@ type Config struct {
 	QueueConfig QueueConfig
 }
 
-func New() *Config {
+func New(url string) *Config {
 	return &Config{
 		URL: "",
 		QueueConfig: QueueConfig{
@@ -44,12 +40,4 @@ func New() *Config {
 			NoLocal:    false,
 		},
 	}
-}
-
-func SetURL(url string) {
-	rmqc.URL = url
-}
-
-func SetQueueConfig(queueConfig QueueConfig) {
-	rmqc.QueueConfig = queueConfig
 }

@@ -12,6 +12,8 @@ type ConsumerConf struct {
 	Exchange string
 
 	RoutingKey string // Key 相当于 kafka topic
+
+	MqConfig *Config
 }
 
 func (cc ConsumerConf) String() string {
@@ -24,7 +26,7 @@ type ConsumerInterface interface {
 
 func (cc ConsumerConf) Consumer(ci ConsumerInterface) error {
 	log.Infof("RabbitMQ ConsumerConf : %v", cc)
-	conn, err := amqp.Dial(rmqc.URL)
+	conn, err := amqp.Dial(cc.MqConfig.URL)
 	if err != nil {
 		log.Error("Connection RabbitMQ error.", err)
 		return err
@@ -37,12 +39,12 @@ func (cc ConsumerConf) Consumer(ci ConsumerInterface) error {
 	}
 	defer ch.Close()
 	q, err := ch.QueueDeclare(
-		cc.RoutingKey,               // name
-		rmqc.QueueConfig.Durable,    // durable
-		rmqc.QueueConfig.AutoDelete, // delete when unused
-		rmqc.QueueConfig.Exclusive,  // exclusive
-		rmqc.QueueConfig.NoWait,     // no-wait
-		rmqc.QueueConfig.Arguments,  // arguments
+		cc.RoutingKey,                      // name
+		cc.MqConfig.QueueConfig.Durable,    // durable
+		cc.MqConfig.QueueConfig.AutoDelete, // delete when unused
+		cc.MqConfig.QueueConfig.Exclusive,  // exclusive
+		cc.MqConfig.QueueConfig.NoWait,     // no-wait
+		cc.MqConfig.QueueConfig.Arguments,  // arguments
 	)
 	if err != nil {
 		log.Error("Get RabbitMQ queue error.", err)
@@ -52,20 +54,20 @@ func (cc ConsumerConf) Consumer(ci ConsumerInterface) error {
 		q.Name,        // queue name
 		cc.RoutingKey, // routing key
 		cc.Exchange,   // exchange
-		rmqc.QueueConfig.NoWait,
-		rmqc.QueueConfig.Arguments)
+		cc.MqConfig.QueueConfig.NoWait,
+		cc.MqConfig.QueueConfig.Arguments)
 	if err != nil {
 		log.Error("RabbitMQ set bind error.", err)
 		return err
 	}
 	msgs, err := ch.Consume(
-		q.Name,                     // queue
-		"",                         // consumer
-		rmqc.QueueConfig.AutoAck,   // auto-ack
-		rmqc.QueueConfig.Exclusive, // exclusive
-		rmqc.QueueConfig.NoLocal,   // no-local
-		rmqc.QueueConfig.NoWait,    // no-wait
-		rmqc.QueueConfig.Arguments, // args
+		q.Name,                            // queue
+		"",                                // consumer
+		cc.MqConfig.QueueConfig.AutoAck,   // auto-ack
+		cc.MqConfig.QueueConfig.Exclusive, // exclusive
+		cc.MqConfig.QueueConfig.NoLocal,   // no-local
+		cc.MqConfig.QueueConfig.NoWait,    // no-wait
+		cc.MqConfig.QueueConfig.Arguments, // args
 	)
 	if err != nil {
 		log.Error("RabbitMQ consume error.", err)

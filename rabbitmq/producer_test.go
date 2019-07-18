@@ -33,10 +33,10 @@ func TestJOSN(t *testing.T) {
 }
 
 func TestProducer(t *testing.T) {
-	SetURL("amqp://username:password@127.0.0.1:5672/")
+	mqConfig := New("amqp://username:password@127.0.0.1:5672/")
 	exchange := "exchange.teste"
 	routingKey := "routing.key.test" // Key 相当于 kafka topic
-	producer := ProducerConf{Exchange: exchange, RoutingKey: routingKey}
+	producer := ProducerConf{Exchange: exchange, RoutingKey: routingKey, MqConfig: mqConfig}
 	i := 1
 	for {
 		err := producer.Send(MqGroupDTO{

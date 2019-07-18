@@ -66,24 +66,14 @@ type oss struct {
 	SecretKey   string `toml:"secret_key"`
 }
 
-type internalURL struct {
-	InternalShopintar     string `toml:"internal_shopintar"`
-	InternalOrder         string `toml:"internal_order"`
-	InternalUser          string `toml:"internal_user"`
-	InternalProduct       string `toml:"internal_product"`
-	InternalPurchaseOrder string `toml:"internal_purchase_order"`
-	InternalPayment       string `toml:"internal_payment"`
-}
-
 type config struct {
-	Http        http        `toml:"http"`
-	JWTToken    jwtToken    `toml:"jwt_token"`
-	Log         logConf     `toml:"log_conf"`
-	MysqlDB     mysqlDB     `toml:"mysql_db"`
-	RedisConf   redisConf   `toml:"redis_conf"`
-	RabbitMQ    rabbitMQ    `toml:"rabbit_mq"`
-	OSS         oss         `toml:"oss"`
-	InternalURL internalURL `toml:"internal_url"`
+	Http      http      `toml:"http"`
+	JWTToken  jwtToken  `toml:"jwt_token"`
+	Log       logConf   `toml:"log_conf"`
+	MysqlDB   mysqlDB   `toml:"mysql_db"`
+	RedisConf redisConf `toml:"redis_conf"`
+	RabbitMQ  rabbitMQ  `toml:"rabbit_mq"`
+	OSS       oss       `toml:"oss"`
 }
 
 func TestParseConfig(t *testing.T) {

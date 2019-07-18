@@ -12,6 +12,8 @@ type ProducerConf struct {
 	Exchange string
 
 	RoutingKey string // Key 相当于 kafka topic
+
+	MqConfig *Config
 }
 
 func (pc ProducerConf) String() string {
@@ -29,9 +31,9 @@ func (pc ProducerConf) Send(producer interface{}) error {
 		//JSON is "{}"
 		return errors.New("Struct to json error.")
 	}
-	conn, err := amqp.Dial(rmqc.URL)
+	conn, err := amqp.Dial(pc.MqConfig.URL)
 	if err != nil {
-		log.Errorf("Connection [%v] RabbitMQ error.", rmqc.URL, err)
+		log.Errorf("Connection [%v] RabbitMQ error.", pc.MqConfig.URL, err)
 		return err
 	}
 	defer conn.Close()
@@ -42,22 +44,22 @@ func (pc ProducerConf) Send(producer interface{}) error {
 	}
 	defer ch.Close()
 	q, err := ch.QueueDeclare(
-		pc.RoutingKey,               // name
-		rmqc.QueueConfig.Durable,    // durable
-		rmqc.QueueConfig.AutoDelete, // delete when unused
-		rmqc.QueueConfig.Exclusive,  // exclusive
-		rmqc.QueueConfig.NoWait,     // no-wait
-		rmqc.QueueConfig.Arguments,  // arguments
+		pc.RoutingKey,                      // name
+		pc.MqConfig.QueueConfig.Durable,    // durable
+		pc.MqConfig.QueueConfig.AutoDelete, // delete when unused
+		pc.MqConfig.QueueConfig.Exclusive,  // exclusive
+		pc.MqConfig.QueueConfig.NoWait,     // no-wait
+		pc.MqConfig.QueueConfig.Arguments,  // arguments
 	)
 	if err != nil {
 		log.Error("Get RabbitMQ queue error.", err)
 		return err
 	}
 	err = ch.Publish(
-		pc.Exchange,                // exchange
-		q.Name,                     // routing key
-		rmqc.QueueConfig.Mandatory, // mandatory
-		rmqc.QueueConfig.Immediate, // immediate
+		pc.Exchange,                       // exchange
+		q.Name,                            // routing key
+		pc.MqConfig.QueueConfig.Mandatory, // mandatory
+		pc.MqConfig.QueueConfig.Immediate, // immediate
 		amqp.Publishing{
 			ContentType: "text/plain",
 			Body:        []byte(producerJSON),
