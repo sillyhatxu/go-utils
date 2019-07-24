@@ -32,5 +32,5 @@ func FormatTimestamp(i int64) time.Time {
 }
 
 func ToMillisecond(t time.Time) int64 {
-	return t.UnixNano() / int64(time.Millisecond)
+	return t.Local().UnixNano() / int64(time.Millisecond)
 }
