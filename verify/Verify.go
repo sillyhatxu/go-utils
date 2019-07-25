@@ -38,6 +38,7 @@ func (v *Verify) Valid(obj interface{}) (bool, error) {
 		return false, fmt.Errorf("%v must be a struct or a struct pointer", obj)
 	}
 	for i := 0; i < objT.NumField(); i++ {
+		fmt.Println(objT.Field(i).Type.Kind() == reflect.Struct)
 		tag := getValidTag(objT.Field(i))
 		fmt.Println(tag)
 	}
