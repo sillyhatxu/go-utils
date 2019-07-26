@@ -2,12 +2,12 @@ package logconfig
 
 import (
 	"fmt"
-	"github.com/bshuster-repo/logrus-logstash-hook"
 	"github.com/lestrrat-go/file-rotatelogs"
 	"github.com/rifflock/lfshook"
-	log "github.com/sirupsen/logrus"
-	logger "log"
-	"net"
+	"github.com/sillyhatxu/go-utils/logstashhook"
+	"github.com/sillyhatxu/go-utils/tcpclient"
+	"github.com/sirupsen/logrus"
+	"log"
 	"os"
 	"time"
 )
@@ -17,18 +17,18 @@ type DefaultFieldHook struct {
 	module  string
 }
 
-func (h *DefaultFieldHook) Levels() []log.Level {
-	return log.AllLevels
+func (h *DefaultFieldHook) Levels() []logrus.Level {
+	return logrus.AllLevels
 }
 
-func (h *DefaultFieldHook) Fire(e *log.Entry) error {
+func (h *DefaultFieldHook) Fire(e *logrus.Entry) error {
 	e.Data["project"] = h.project
 	e.Data["module"] = h.module
 	return nil
 }
 
 type logConfig struct {
-	logLevel        log.Level
+	logLevel        logrus.Level
 	reportCaller    bool
 	project         string
 	module          string
@@ -38,7 +38,7 @@ type logConfig struct {
 	filePath        string
 }
 
-func NewLogConfig(logLevel log.Level, reportCaller bool, project string, module string, openLogstash bool, logstashAddress string, openLogfile bool, filePath string) *logConfig {
+func NewLogConfig(logLevel logrus.Level, reportCaller bool, project string, module string, openLogstash bool, logstashAddress string, openLogfile bool, filePath string) *logConfig {
 	return &logConfig{
 		logLevel:        logLevel,
 		reportCaller:    reportCaller,
@@ -56,27 +56,27 @@ func (lc logConfig) String() string {
 }
 
 func (lc logConfig) InitialLogConfig() {
-	logger.Println("InitialLogConfig :", lc)
-	logFormatter := &log.JSONFormatter{
+	log.Println("InitialLogConfig :", lc)
+	logFormatter := &logrus.JSONFormatter{
 		TimestampFormat: time.RFC3339Nano,
 		//TimestampFormat:string("2006-01-02 15:04:05"),
-		FieldMap: *&log.FieldMap{
-			log.FieldKeyMsg:  "message",
-			log.FieldKeyTime: "@timestamp",
+		FieldMap: *&logrus.FieldMap{
+			logrus.FieldKeyMsg:  "message",
+			logrus.FieldKeyTime: "@timestamp",
 		},
 	}
-	log.SetOutput(os.Stdout)
-	log.SetLevel(lc.logLevel)
-	log.SetReportCaller(lc.reportCaller)
-	log.SetFormatter(logFormatter)
-	log.AddHook(&DefaultFieldHook{project: lc.project, module: lc.module})
+	logrus.SetOutput(os.Stdout)
+	logrus.SetLevel(lc.logLevel)
+	logrus.SetReportCaller(lc.reportCaller)
+	logrus.SetFormatter(logFormatter)
+	logrus.AddHook(&DefaultFieldHook{project: lc.project, module: lc.module})
 	if lc.openLogstash {
-		conn, err := net.Dial("tcp", lc.logstashAddress)
+		conn, err := tcpclient.Dial("tcp", lc.logstashAddress)
 		if err != nil {
-			logger.Panicf("net.Dial('tcp', %v); Error : %v", lc.logstashAddress, err)
+			log.Panicf("net.Dial('tcp', %v); Error : %v", lc.logstashAddress, err)
 		}
-		hook := logrustash.New(conn, logrustash.DefaultFormatter(log.Fields{"project": lc.project, "module": lc.module}))
-		log.AddHook(hook)
+		hook := logstashhook.New(conn, logstashhook.DefaultFormatter(logrus.Fields{"project": lc.project, "module": lc.module}))
+		logrus.AddHook(hook)
 	}
 	if lc.openLogfile {
 		path := lc.filePath + lc.module + ".log"
@@ -89,13 +89,13 @@ func (lc logConfig) InitialLogConfig() {
 			rotatelogs.WithRotationTime(WithRotationTime),
 		)
 		if err != nil {
-			logger.Panicf("rotatelogs.New [info writer] error; Error : %v", err)
+			log.Panicf("rotatelogs.New [info writer] error; Error : %v", err)
 		}
-		log.AddHook(lfshook.NewHook(
+		logrus.AddHook(lfshook.NewHook(
 			lfshook.WriterMap{
-				log.InfoLevel:  infoWriter,
-				log.WarnLevel:  infoWriter,
-				log.ErrorLevel: infoWriter,
+				logrus.InfoLevel:  infoWriter,
+				logrus.WarnLevel:  infoWriter,
+				logrus.ErrorLevel: infoWriter,
 			},
 			logFormatter,
 		))
@@ -106,12 +106,12 @@ func (lc logConfig) InitialLogConfig() {
 			rotatelogs.WithRotationTime(WithRotationTime),
 		)
 		if err != nil {
-			logger.Panicf("rotatelogs.New [error writer] error; Error : %v", err)
+			log.Panicf("rotatelogs.New [error writer] error; Error : %v", err)
 		}
-		log.AddHook(lfshook.NewHook(
+		logrus.AddHook(lfshook.NewHook(
 			lfshook.WriterMap{
-				log.WarnLevel:  errorWriter,
-				log.ErrorLevel: errorWriter,
+				logrus.WarnLevel:  errorWriter,
+				logrus.ErrorLevel: errorWriter,
 			},
 			logFormatter,
 		))
