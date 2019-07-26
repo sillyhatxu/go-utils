@@ -6,8 +6,8 @@ import (
 	"github.com/lestrrat-go/file-rotatelogs"
 	"github.com/rifflock/lfshook"
 	log "github.com/sirupsen/logrus"
+	"go-utils/tcpclient"
 	logger "log"
-	"net"
 	"os"
 	"time"
 )
@@ -71,7 +71,7 @@ func (lc logConfig) InitialLogConfig() {
 	log.SetFormatter(logFormatter)
 	log.AddHook(&DefaultFieldHook{project: lc.project, module: lc.module})
 	if lc.openLogstash {
-		conn, err := net.Dial("tcp", lc.logstashAddress)
+		conn, err := tcpclient.Dial("tcp", lc.logstashAddress)
 		if err != nil {
 			logger.Panicf("net.Dial('tcp', %v); Error : %v", lc.logstashAddress, err)
 		}
