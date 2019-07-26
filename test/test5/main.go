@@ -46,7 +46,13 @@ func ReplaceAll(c string) string {
 }
 
 func main() {
-	columns := []string{"序号", "姓名", "性别", "年龄", "学历", "身份证号", "手机号", "邮箱号", "身份证地址", "工作单位", "单位地址", "单位电话", "申请原因", "银行名称", "收卡地址", "申请时间", "推荐人姓名", "推荐人手机号", "备注"}
+	columns := []string{
+		"序号", "姓名", "性别", "年龄",
+		"学历", "身份证号", "手机号",
+		"邮箱号", "身份证地址", "工作单位",
+		"单位地址", "单位电话", "申请原因",
+		"银行名称", "收卡地址", "申请时间",
+		"推荐人姓名", "推荐人手机号", "备注"}
 	rowArray := ReadFile("/Users/cookie/go/gopath/src/go-utils/test/test5/test.txt")
 	for i, row := range rowArray {
 		fmt.Print(i+1, ",")
